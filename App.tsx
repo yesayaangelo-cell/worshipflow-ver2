@@ -560,7 +560,7 @@ export default function App() {
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                   <div>
-                    <h3 className="text-3xl font-black text-white uppercase tracking-tight">Smart Schedule</h3>
+                    <h3 className="text-3xl font-black text-white uppercase tracking-tight">WorshipFlow</h3>
                     <p className="text-[11px] font-black text-[#888888] uppercase tracking-widest mt-1">Upcoming services: {events.length} / {EVENT_LIMIT}</p>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
