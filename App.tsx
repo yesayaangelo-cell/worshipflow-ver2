@@ -556,89 +556,213 @@ export default function App() {
             )}
 
             {activeTab === 'schedule' && (
-              <section className="space-y-12 animate-in slide-in-from-bottom-4 duration-500">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+              <section className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
                   <div>
-                    <h3 className="text-3xl font-black text-white uppercase tracking-tight">Service Schedules</h3>
-                    <p className="text-[11px] font-black text-[#888888] uppercase tracking-widest mt-1">Managed services: {events.length} / {EVENT_LIMIT}</p>
+                    <h3 className="text-3xl font-black text-white uppercase tracking-tight">Smart Schedule</h3>
+                    <p className="text-[11px] font-black text-[#888888] uppercase tracking-widest mt-1">Upcoming services: {events.length} / {EVENT_LIMIT}</p>
                   </div>
                   <div className="flex gap-3 w-full sm:w-auto">
-                    <button onClick={handleShareAllSchedules} className="flex-1 sm:flex-none bg-[#1A1A1A] border border-[#262626] text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#262626] transition-all">Share All</button>
-                    <button onClick={() => { setFormData({ date: new Date().toISOString().split('T')[0], time: '09:00' }); setModalType('add_event'); }} className="flex-1 sm:flex-none bg-[#C0FF00] text-black px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest neon-glow active:scale-95 transition-all flex items-center gap-2">
-                      <Plus size={18} strokeWidth={3} /> New Service
+                    <button onClick={handleShareAllSchedules} className="flex-1 sm:flex-none bg-[#1A1A1A] border border-[#262626] text-white px-5 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#262626] hover:border-[#333333] transition-all flex items-center gap-2">
+                      <Share2 size={14} /> Share All
+                    </button>
+                    <button onClick={() => { setFormData({ date: new Date().toISOString().split('T')[0], time: '09:00' }); setModalType('add_event'); }} className="flex-1 sm:flex-none bg-[#C0FF00] text-black px-6 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest neon-glow active:scale-95 transition-all flex items-center gap-2">
+                      <Plus size={16} strokeWidth={3} /> New Service
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                {/* Modern Card Feed */}
+                <div className="flex flex-col gap-6">
                   {sortedEvents.map(ev => {
                     const eventDate = new Date(ev.date);
                     const eventAssignments = assignments.filter(a => a.eventId === ev.id);
                     const eventSongsList = eventSongs.filter(s => s.eventId === ev.id);
+                    
+                    // Group assignments by category
+                    const worshipLeader = eventAssignments.find(a => a.role === 'WL');
+                    const singers = eventAssignments.filter(a => a.role === 'Singer');
+                    const musicians = eventAssignments.filter(a => !['WL', 'Singer'].includes(a.role));
+                    
+                    const wlMember = worshipLeader ? members.find(m => m.id === worshipLeader.memberId) : null;
+
                     return (
-                      <div key={ev.id} className="bg-[#1A1A1A] rounded-[2rem] p-8 border border-[#262626] hover:border-[#C0FF00]/50 transition-all group shadow-xl">
-                        <div className="flex justify-between items-start mb-10">
-                          <div className="flex gap-6">
-                            <div className="bg-[#0B0B0B] border border-[#262626] px-5 py-6 rounded-2xl flex flex-col items-center justify-center shrink-0 group-hover:border-[#C0FF00]/30 transition-all">
-                              <span className="text-[10px] font-black text-[#C0FF00] uppercase tracking-widest mb-1">{eventDate.toLocaleString('default', { month: 'short' })}</span>
-                              <span className="text-2xl font-black text-white">{eventDate.getDate()}</span>
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="text-xl font-black text-white uppercase tracking-tight mb-2 truncate group-hover:text-[#C0FF00] transition-colors">{ev.name}</h4>
-                              <div className="flex gap-2">
-                                <span className="text-[9px] font-black text-[#888888] bg-[#0B0B0B] border border-[#262626] px-3 py-1 rounded-lg uppercase tracking-widest flex items-center gap-2"><Clock size={10} /> {ev.time}</span>
-                                <span className="text-[9px] font-black text-[#C0FF00] bg-[#C0FF00]/10 border border-[#C0FF00]/20 px-3 py-1 rounded-lg uppercase tracking-widest">Sunday Service</span>
+                      <div key={ev.id} className="bg-[#1A1A1A] rounded-3xl border border-[#262626] hover:border-[#C0FF00]/40 transition-all group shadow-xl overflow-hidden">
+                        {/* Card Header - Date & Service Name */}
+                        <div className="bg-gradient-to-r from-[#0B0B0B] to-[#1A1A1A] px-6 py-5 border-b border-[#262626]">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-5">
+                              {/* Date Badge */}
+                              <div className="bg-[#C0FF00]/10 border border-[#C0FF00]/30 px-4 py-3 rounded-2xl flex flex-col items-center min-w-[70px]">
+                                <span className="text-[10px] font-black text-[#C0FF00] uppercase tracking-wider">{eventDate.toLocaleString('default', { month: 'short' })}</span>
+                                <span className="text-2xl font-black text-white leading-none mt-0.5">{eventDate.getDate()}</span>
+                                <span className="text-[8px] font-bold text-[#888888] uppercase mt-1">{eventDate.toLocaleString('default', { weekday: 'short' })}</span>
+                              </div>
+                              {/* Service Info */}
+                              <div>
+                                <h4 className="text-lg font-black text-white uppercase tracking-tight group-hover:text-[#C0FF00] transition-colors">{ev.name}</h4>
+                                <div className="flex items-center gap-3 mt-2">
+                                  <span className="text-[9px] font-black text-[#888888] bg-[#0B0B0B] border border-[#262626] px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5">
+                                    <Clock size={10} className="text-[#C0FF00]" /> {ev.time}
+                                  </span>
+                                  <span className="text-[9px] font-black text-[#C0FF00] bg-[#C0FF00]/10 border border-[#C0FF00]/20 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                                    {ev.category || 'Sunday Service'}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex gap-1">
-                            <button onClick={() => handleShareSchedule(ev)} className="p-2 text-[#888888] hover:text-[#C0FF00] transition-colors"><Share2 size={18} /></button>
-                            <button onClick={() => setConfirmState({ isOpen: true, title: 'Delete Schedule?', message: 'Confirming permanent removal.', onConfirm: () => setEvents(prev => prev.filter(e => e.id !== ev.id)) })} className="p-2 text-[#888888] hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1">
+                              <button 
+                                onClick={() => setConfirmState({ isOpen: true, title: 'Delete Schedule?', message: 'This action cannot be undone.', onConfirm: () => setEvents(prev => prev.filter(e => e.id !== ev.id)) })} 
+                                className="p-2.5 text-[#888888] hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mb-10">
-                           <div className="bg-[#0B0B0B] p-5 rounded-2xl border border-[#262626] min-h-[140px] flex flex-col">
-                             <p className="text-[9px] font-black text-[#888888] uppercase tracking-widest mb-3">Musicians</p>
-                             <div className="flex flex-col gap-1.5 overflow-y-auto custom-scrollbar max-h-[100px]">
-                                {eventAssignments.length > 0 ? (
-                                  eventAssignments.map(a => {
+
+                        {/* Team Quick-View Grid */}
+                        <div className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            {/* Worship Leader */}
+                            <div className="bg-[#0B0B0B] p-4 rounded-2xl border border-[#262626] hover:border-[#C0FF00]/20 transition-all">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-6 h-6 rounded-lg bg-[#C0FF00]/20 flex items-center justify-center">
+                                  <Mic2 size={12} className="text-[#C0FF00]" />
+                                </div>
+                                <span className="text-[9px] font-black text-[#C0FF00] uppercase tracking-widest">Worship Leader</span>
+                              </div>
+                              {wlMember ? (
+                                <div className="flex items-center gap-3">
+                                  <div className="w-9 h-9 rounded-xl bg-[#C0FF00] text-black flex items-center justify-center font-black text-[10px]">
+                                    {wlMember.avatar}
+                                  </div>
+                                  <span className="text-sm font-bold text-white">{wlMember.name}</span>
+                                </div>
+                              ) : (
+                                <p className="text-[11px] font-bold text-[#333333] italic">Not assigned</p>
+                              )}
+                            </div>
+
+                            {/* Singers */}
+                            <div className="bg-[#0B0B0B] p-4 rounded-2xl border border-[#262626] hover:border-[#C0FF00]/20 transition-all">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-6 h-6 rounded-lg bg-[#C0FF00]/20 flex items-center justify-center">
+                                  <Music size={12} className="text-[#C0FF00]" />
+                                </div>
+                                <span className="text-[9px] font-black text-[#C0FF00] uppercase tracking-widest">Singers</span>
+                                {singers.length > 0 && <span className="text-[9px] font-black text-[#888888]">({singers.length})</span>}
+                              </div>
+                              {singers.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {singers.map(a => {
                                     const member = members.find(m => m.id === a.memberId);
-                                    return (
-                                      <p key={a.id} className="text-[10px] font-bold text-white truncate flex items-center">
-                                        <span className="text-[#C0FF00] mr-2 text-[6px]">●</span> {member?.name || 'Unknown'}
-                                      </p>
-                                    );
-                                  })
-                                ) : (
-                                  <p className="text-[10px] font-black text-[#333333] uppercase italic">Roster Empty</p>
-                                )}
-                             </div>
-                           </div>
-                           <div className="bg-[#0B0B0B] p-5 rounded-2xl border border-[#262626] min-h-[140px] flex flex-col">
-                             <p className="text-[9px] font-black text-[#888888] uppercase tracking-widest mb-3">Setlist</p>
-                             <div className="flex flex-col gap-1.5 overflow-y-auto custom-scrollbar max-h-[100px]">
-                                {eventSongsList.length > 0 ? (
-                                  eventSongsList.map(s => (
-                                    <p key={s.id} className="text-[10px] font-bold text-white truncate flex items-center">
-                                      <span className="text-[#C0FF00] mr-2 text-[6px]">●</span> {s.title}
-                                    </p>
-                                  ))
-                                ) : (
-                                  <p className="text-[10px] font-black text-[#333333] uppercase italic">No Songs</p>
-                                )}
-                             </div>
-                           </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <button onClick={() => { setSelectedEventId(ev.id); setModalType('assign_team'); }} className="flex-1 bg-[#C0FF00] text-black py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#d4ff4d] transition-all flex items-center justify-center gap-2 shadow-lg">
-                             <UserPlus size={14} /> Team
-                          </button>
-                          <button onClick={() => { setSelectedEventId(ev.id); setModalType('manage_songs'); }} className="flex-1 bg-[#262626] text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#333333] transition-all flex items-center justify-center gap-2 shadow-lg">
-                             <ListMusic size={14} className="text-[#C0FF00]" /> Setlist
-                          </button>
+                                    return member ? (
+                                      <div key={a.id} className="flex items-center gap-2 bg-[#1A1A1A] px-2.5 py-1.5 rounded-lg border border-[#262626]">
+                                        <div className="w-5 h-5 rounded-md bg-[#262626] text-white flex items-center justify-center font-black text-[7px]">
+                                          {member.avatar}
+                                        </div>
+                                        <span className="text-[10px] font-bold text-white">{member.name.split(' ')[0]}</span>
+                                      </div>
+                                    ) : null;
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-[11px] font-bold text-[#333333] italic">Not assigned</p>
+                              )}
+                            </div>
+
+                            {/* Musicians */}
+                            <div className="bg-[#0B0B0B] p-4 rounded-2xl border border-[#262626] hover:border-[#C0FF00]/20 transition-all">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-6 h-6 rounded-lg bg-[#C0FF00]/20 flex items-center justify-center">
+                                  <Users size={12} className="text-[#C0FF00]" />
+                                </div>
+                                <span className="text-[9px] font-black text-[#C0FF00] uppercase tracking-widest">Musicians</span>
+                                {musicians.length > 0 && <span className="text-[9px] font-black text-[#888888]">({musicians.length})</span>}
+                              </div>
+                              {musicians.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {musicians.map(a => {
+                                    const member = members.find(m => m.id === a.memberId);
+                                    return member ? (
+                                      <div key={a.id} className="flex items-center gap-2 bg-[#1A1A1A] px-2.5 py-1.5 rounded-lg border border-[#262626]">
+                                        <div className="w-5 h-5 rounded-md bg-[#262626] text-white flex items-center justify-center font-black text-[7px]">
+                                          {member.avatar}
+                                        </div>
+                                        <span className="text-[10px] font-bold text-white">{member.name.split(' ')[0]}</span>
+                                        <span className="text-[8px] font-bold text-[#888888] uppercase">{a.role}</span>
+                                      </div>
+                                    ) : null;
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-[11px] font-bold text-[#333333] italic">Not assigned</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Setlist Preview */}
+                          {eventSongsList.length > 0 && (
+                            <div className="bg-[#0B0B0B] p-4 rounded-2xl border border-[#262626] mb-6">
+                              <div className="flex items-center gap-2 mb-3">
+                                <ListMusic size={14} className="text-[#C0FF00]" />
+                                <span className="text-[9px] font-black text-[#C0FF00] uppercase tracking-widest">Setlist</span>
+                                <span className="text-[9px] font-black text-[#888888]">({eventSongsList.length} songs)</span>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {eventSongsList.map((s, idx) => (
+                                  <span key={s.id} className="text-[10px] font-bold text-white bg-[#1A1A1A] px-3 py-1.5 rounded-lg border border-[#262626]">
+                                    {idx + 1}. {s.title} <span className="text-[#C0FF00]">({s.key})</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <button 
+                              onClick={() => { setSelectedEventId(ev.id); setModalType('assign_team'); }} 
+                              className="flex-1 bg-[#C0FF00] text-black py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#d4ff4d] transition-all flex items-center justify-center gap-2 shadow-lg"
+                            >
+                              <UserPlus size={14} /> Manage Team
+                            </button>
+                            <button 
+                              onClick={() => { setSelectedEventId(ev.id); setModalType('manage_songs'); }} 
+                              className="flex-1 bg-[#262626] text-white py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#333333] transition-all flex items-center justify-center gap-2"
+                            >
+                              <ListMusic size={14} className="text-[#C0FF00]" /> Edit Setlist
+                            </button>
+                            <button 
+                              onClick={() => handleShareSchedule(ev)} 
+                              className="flex-1 sm:flex-none bg-[#25D366]/10 border border-[#25D366]/30 text-[#25D366] py-3.5 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#25D366]/20 transition-all flex items-center justify-center gap-2"
+                            >
+                              <Copy size={14} /> Copy for WhatsApp
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
                   })}
+                  
+                  {/* Empty State */}
+                  {events.length === 0 && (
+                    <div className="bg-[#1A1A1A] rounded-3xl border border-[#262626] p-12 text-center">
+                      <Calendar size={48} className="text-[#333333] mx-auto mb-4" />
+                      <h4 className="text-lg font-black text-white uppercase mb-2">No Services Scheduled</h4>
+                      <p className="text-[11px] font-bold text-[#888888] uppercase tracking-wider mb-6">Create your first service schedule to get started</p>
+                      <button 
+                        onClick={() => { setFormData({ date: new Date().toISOString().split('T')[0], time: '09:00' }); setModalType('add_event'); }} 
+                        className="bg-[#C0FF00] text-black px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest neon-glow"
+                      >
+                        <Plus size={14} className="inline mr-2" /> Create First Service
+                      </button>
+                    </div>
+                  )}
                 </div>
               </section>
             )}
